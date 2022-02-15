@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <AssemblyName>ConcurrentCollections</AssemblyName>
-    <Authors>Emre Gönültaş</Authors>
+    <Authors>emre-gon</Authors>
     <ContinuousIntegrationBuild>True</ContinuousIntegrationBuild>
-    <Copyright>Copyright 2022 Emre Gönültaş</Copyright>
+    <Copyright>2022</Copyright>
     <Description>A thread-safe hash-based set, extends IProducerConsumerCollection</Description>
     <Deterministic>true</Deterministic>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
@@ -21,10 +21,11 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Title>ConcurrentHashSet</Title>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <PackageProjectUrl>https://github.com/emre-gon/ConcurrentHashSet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/emre-gon/ConcurrentHashSet</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Product>Concurrent HashSet</Product>
   </PropertyGroup>
 
   <ItemGroup>
