@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Collections.Concurrent;
+using System.Linq;
 
 namespace ConcurrentCollections
 {
@@ -16,7 +18,7 @@ namespace ConcurrentCollections
     /// concurrently from multiple threads.
     /// </remarks>
     [DebuggerDisplay("Count = {Count}")]
-    public class ConcurrentHashSet<T> : IReadOnlyCollection<T>, ICollection<T>
+    public class ConcurrentHashSet<T> : IReadOnlyCollection<T>, ICollection<T>, IProducerConsumerCollection<T>
     {
         private const int DefaultCapacity = 31;
         private const int MaxLockNumber = 1024;
@@ -534,6 +536,16 @@ namespace ConcurrentCollections
 
         bool ICollection<T>.IsReadOnly => false;
 
+        /// <summary>
+        /// IProducerConsumerCollection overload
+        /// </summary>
+        public bool IsSynchronized => false;
+
+        /// <summary>
+        /// IProducerConsumerCollection overload
+        /// </summary>
+        public object SyncRoot => throw new NotSupportedException("ConcurrentCollection_SyncRoot_NotSupported");
+
         void ICollection<T>.CopyTo(T[] array, int arrayIndex)
         {
             if (array == null) throw new ArgumentNullException(nameof(array));
@@ -557,7 +569,7 @@ namespace ConcurrentCollections
                     throw new ArgumentException("The index is equal to or greater than the length of the array, or the number of elements in the set is greater than the available space from index to the end of the destination array.");
                 }
 
-                CopyToItems(array, arrayIndex);
+                CopyTo(array, arrayIndex);
             }
             finally
             {
@@ -861,7 +873,12 @@ namespace ConcurrentCollections
             }
         }
 
-        private void CopyToItems(T[] array, int index)
+        /// <summary>
+        /// IProducerConsumerCollection overload
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public void CopyTo(T[] array, int index)
         {
             var buckets = _tables.Buckets;
             for (var i = 0; i < buckets.Length; i++)
@@ -872,6 +889,51 @@ namespace ConcurrentCollections
                     index++; //this should never flow, CopyToItems is only called when there's no overflow risk
                 }
             }
+        }
+
+        /// <summary>
+        /// IProducerConsumerCollection overload
+        /// </summary>
+        /// <returns></returns>
+        public T[] ToArray()
+        {
+            T[] array = new T[this.Count];
+            CopyTo(array, 0);
+            return array;
+        }
+
+        /// <summary>
+        /// IProducerConsumerCollection overload
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool TryAdd(T item)
+        {
+            this.Add(item);
+            return true;
+        }
+
+
+        /// <summary>
+        /// IProducerConsumerCollection overload
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool TryTake(out T item)
+        {
+            item = this.First();
+            this.TryRemove(item);
+            return true;
+        }
+
+        /// <summary>
+        /// IProducerConsumerCollection overload
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="index"></param>
+        public void CopyTo(Array array, int index)
+        {
+            this.ToArray().CopyTo(array, index);
         }
 
         private class Tables
